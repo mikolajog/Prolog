@@ -1,0 +1,113 @@
+
+% Dodaj 1 do każdego elementu listy Lista i zwróć wynik jako ListaPlus1.
+% Przykład:
+% ?- dodaj_jeden([5,3,19,4],X).
+% X = [6,4,20,5]
+
+sklej([],X,X).
+sklej([X|L1],L2,[X|L3]) :-
+	sklej(L1,L2,L3).
+
+dodaj_jeden([A], X):-
+	B is A+1,
+	sklej([B],[],X).
+	
+dodaj_jeden([A|Reszta], ListaPlus1) :- 
+	dodaj_jeden(Reszta,X),
+	B is A+1,
+	sklej([B],X,ListaPlus1),!.
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Podziel listę na dwie części. W pierwszej z nich powinny znaleźć się
+% elementy dodatnie, a w drugiej z nich elementy ujemne.
+% Przykład:
+% ?- podziel([1,-3,-7,2,8], Dodatnie, Ujemne).
+% Dodatnie = [1,2,8]
+% Ujemne = [-3,-7]
+
+podziel([A],[A],[]):-
+	A>0.
+podziel([A],[],[A]):-
+	A<0.
+
+podziel([A|Reszta], Dodatnie, Ujemne) :-
+	podziel(Reszta,D,Ujemne),
+	A>0,
+	sklej([A],D,Dodatnie),!. 
+
+podziel([A|Reszta], Dodatnie, Ujemne) :-
+	podziel(Reszta,Dodatnie,U),
+	A<0,
+	sklej([A],U,Ujemne),!.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Znasz matrioszki? To rosyjskie wydrążone w środku lalki, które są włożone
+% jedna w drugą.
+% Dana jest baza wiedzy o naszym zbiorze matrioszek jak niżej:
+
+% w(WewnętrznaLalka, ZewnętrznaLalka) -- definiuje bezpośrednie połączenie
+% między matrioszkami (tzn. walentina znajduje się bezpośrednio w irinie)
+w(walentina, irina).
+w(natasza, katarina).
+w(katarina, olga).
+w(swietlana, walentina).
+
+% (a) 
+% Chcemy mieć możliwość definiowana bazy jak niżej. Spraw, aby było to
+% możliwe (odkomentuj te linie po wykonaniu tej części zadania)
+
+:- op(100, xfy, w).
+
+ludmila w swietlana.
+oksana w radmila.
+
+% (b) 
+% Dopisz predykat wewnetrzna/2, który sprawdza czy lalka A jest
+% wewnątrz lalki B (albo bezpośrednio albo pośrednio).
+% Przykład:
+% ?- wewnetrzna(natasza, olga).
+% True   %% pomiędzy nimi jest katarina
+% ?- wewnetrzna(radmila, oksana).
+% False
+
+wewnetrzna(X,Y):-
+	w(X,Y),!.
+
+wewnetrzna(LalkaA, LalkaB) :-
+	w(LalkaA,X),
+	wewnetrzna(X,LalkaB).
+
+% (c) 
+% Dopisz predykat rozmiar_grupy/2, który wylicza ile matrioszek jest
+% w grupie razem ze wskazaną lalką (albo na zewnątrz albo wewnątrz
+% wskazanej lalki).
+% Przykład:
+% ?- rozmiar_grupy(swietlana, X).
+% X = 4  % ludmila, swietlana, walentina, irina
+
+dlugosc([],0).
+dlugosc([_|Ogon],Dlug) :-
+	dlugosc(Ogon,X),
+	Dlug is X+1.
+
+wewnetrzna1(X,Y,[X,Y]):-
+	w(X,Y),!.
+
+wewnetrzna1(LalkaA, LalkaB, L) :-
+	w(LalkaA,X),
+	wewnetrzna1(X,LalkaB,L1),
+	sklej([LalkaA],L1,L).
+
+rozmiar_grupy(Lalka, Rozmiar) :- 
+	wewnetrzna1(Lalka,X, W),
+	wewnetrzna1(Y,Lalka, W1),
+	dlugosc(W,A1),
+	dlugosc(W1,A2),
+	Rozmiar is A1+A2.
+
+ostatni([A],A).
+ostatni([A|Reszta],X):-
+	ostatni(Reszta,X).
+
